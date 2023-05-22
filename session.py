@@ -1,13 +1,10 @@
 import json
 import sqlalchemy
-import sys
-import os
 from sqlalchemy.orm import sessionmaker
-import pprint
 
 from models import create_tables, Publisher,Shop, Book, Stock, Sale
 
-DSN = 'postgresql://postgres:3543@localhost:5432/azoxe_orm'           #строка подключения к источнику данных
+DSN = ''           #строка подключения к источнику данных
 engine = sqlalchemy.create_engine(DSN)
 
 create_tables(engine)
@@ -30,11 +27,16 @@ session.commit()
 
 def get_info(author):
     info = session.query(Book.title, Shop.name, Stock.count, Sale.date_sale).select_from(Shop).join(Stock).join(Book).join(Publisher).join(Sale)
-    f = info.filter(Publisher.name == author).all()
-    for b, s, st, sa in f:
-        print(b, s, st, sa)
+    if type(author) == int:
+        f = info.filter(Publisher.name == author).all()
+        for b, s, st, sa in f:
+            return b, s, st, sa
+    if type(author) == str:
+        f = info.filter(Publisher.id == author).all()
+        for b, s, st, sa in f:
+            return b, s, st, sa
 
-get_info("Pearson")
+print(get_info('1'))
 
 session.close()
 
